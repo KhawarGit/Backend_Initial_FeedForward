@@ -5,8 +5,8 @@ const { connectionString } = require('./db/config.js');
 const { PORT } = require('./constants.js');
 const sql = require('msnodesqlv8');
 // Importing Router middlewares
-// const UserRouter = require('./routes/user.router.js');
-
+const UserRouter = require('./routes/user.router.js');
+const OrgRouter = require('./routes/organization.router.js');
 
 dotenv.config({
     path: './env'
@@ -37,7 +37,8 @@ dotenv.config({
 // );
 
 //Configuring Router Middleware
-// app.use("/user", UserRouter);
+app.use("/user", UserRouter);
+app.use("/org", OrgRouter);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)

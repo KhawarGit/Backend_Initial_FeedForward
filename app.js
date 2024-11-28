@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors'); //CORS: Cross-origin Resource Sharing
 const cookieParser = require('cookie-parser'); /// middleware for parsing cookies.
-
+const bodyParser = require('body-parser');
 const app = express();
 
 //Cogifuring
@@ -14,5 +14,6 @@ app.use(express.json({limit: "16kb"})) // for working with request body.
 app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser()) // for working with cookies.
+app.use(bodyParser.json());
 
 module.exports = app;

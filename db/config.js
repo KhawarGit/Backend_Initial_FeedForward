@@ -32,10 +32,11 @@
 // };
 // // module.exports = sql;
 
-const sql = require('msnodesqlv8');
+// const sql = require('msnodesqlv8');
 
 const connectionString = `server=DESKTOP-DKU3CTI\\SQLEXPRESS02;Database=FeedForward_development;Trusted_Connection=Yes;Driver= {ODBC Driver 17 for Sql Server}`;
 
-module.exports = {
-  connectionString
-}
+// module.exports = {
+//   connectionString
+// };
+module.exports = connectionString;
