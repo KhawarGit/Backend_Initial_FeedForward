@@ -60,10 +60,16 @@
 const ApiError = require('./../utils/ApiError.js');
 const ApiResponse = require('./../utils/ApiResponse.js');
 const asyncHandler = require('./../utils/asyncHandler.js');
-const { passwordHasher } = require('./../HelperFunctions/passwordHasher.helper.js');
+const { passwordHasher, passwordValidator } = require('./../HelperFunctions/passwordHasher.helper.js');
+const generateAccessAndRefreshTokens = require('./../HelperFunctions/generateTokens.helper.js');
+
 const Database_Query = require('./../db/query.js');
 const connectionString = require('./../db/config.js');
+
+
 const sql = require('msnodesqlv8');
+
+
 
 // Registering general user
 const postAddGeneralUser = asyncHandler(async (req, res) => {
@@ -119,6 +125,64 @@ const postAddGeneralUser = asyncHandler(async (req, res) => {
     res.status(201).json(new ApiResponse(201, { createdUserId: createdUserDb[0].id }));
 });
 
+//LOGIN
+//algo
+// first validate password, 
+// then generate tokens.
+// send user the tokens.
+const postLogin = asyncHandler (async (req, res) => {
+    const { email, password } = req.body;
+
+    let getUserViaEmail_Query = `select * from [User] join UserRole ON [User].userRoleId = UserRole.id where emailAddress = '${email}'`;
+
+    let getUserViaEmailResult = await Database_Query(getUserViaEmail_Query);
+
+    if ( getUserViaEmailResult == [] ) throw new ApiError(
+        401,
+        "Bad request, User with this email address do not exist"
+    );
+    
+    if (await passwordValidator(password, getUserViaEmailResult[0].password)) {
+        const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(
+            getUserViaEmailResult[0].id,
+            getUserViaEmailResult[0].role,
+            getUserViaEmailResult[0].username,
+            (getUserViaEmailResult[0].firstName && getUserViaEmailResult[0].middleName && getUserViaEmailResult[0].lastName) ? getUserViaEmailResult[0].firstName + ' '+ getUserViaEmailResult[0].middleName + ' '+ getUserViaEmailResult[0].lastName : getUserViaEmailResult[0].firstName + ' ' +  getUserViaEmailResult[0].middleName,
+            getUserViaEmailResult[0].email,
+        );
+
+        let options = {
+            httpOnly: true,
+            secure: true,
+            path: "/"
+        };
+
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: getUserViaEmailResult[0],
+                    accessToken,
+                    refreshToken
+                }
+            )
+        )
+
+
+    } else {
+        throw new ApiError(
+            401,
+            "Bad request! Incorrect passsword"
+        );
+    }
+
+})
+
 module.exports = {
     postAddGeneralUser,  // Ensure this is being exported
+    postLogin
 };
