@@ -1,9 +1,10 @@
 const asyncHandler = require('./../utils/asyncHandler.js');
 const ApiError = require('./../utils/ApiError.js');
+const { connectionString } = require('./db/config.js');
 
-Database_Query = asyncHandler (async (con_str, query) => {
+Database_Query = asyncHandler (async ( query ) => {
     await sql.query(
-        con_str,
+        connectionString,
         query,
         (err, rows) => {
             if(err){ 
